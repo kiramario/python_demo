@@ -9,6 +9,12 @@ import threading
 import time
 
 
+
+def spy_threading():
+    while True:
+        print(f'current threading num: {threading.active_count()}')
+        time.sleep(1)
+
 def worker(num):
     """子线程执行的函数"""
     print(f'Worker {num}-{threading.get_ident()} started.')
@@ -16,14 +22,16 @@ def worker(num):
     print(f'Worker {num}-{threading.get_ident()} finish.')
 
 def run():
-    jobs = []
+    jobs = [threading.Thread(target=spy_threading, daemon=True)]
     for i in range(5):
         t = threading.Thread(target=worker, args=(i,))
         jobs.append(t)
+
+    for t in jobs:
         t.start()
 
     for i in range(5):
-        jobs[i].join()
+        jobs[i+1].join()
 
     print("all jobs finish, main thread exit")
 

@@ -26,7 +26,7 @@ def spinner_func(before='', after=''):
         msg = before + DISPLAY[pos] + after
         write(msg)
         flush()
-        write('\x08' * len(msg))
+        write('\x08' * len(msg)-1)
         time.sleep(DELAY)
 
 def long_computation():

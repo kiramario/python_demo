@@ -7,7 +7,7 @@
 import datetime
 import firebase_admin
 from firebase_admin import auth, credentials
-
+from firebase_admin.auth import ActionCodeSettings
 
 
 def retrive_user_info():
@@ -82,13 +82,33 @@ def retrive_user_info():
         print('User: ' + user.uid)
 
 
-
-def run():
+def email_generate():
+    # Initialize app
     cred = credentials.Certificate("E:\\FTP_Server\\JOS@\\Projects\\pythonProjects\\python_demo\\secrets\\fir-fe63d-firebase-adminsdk-fbsvc-9f369cab31.json")
     default_app = firebase_admin.initialize_app(cred)
 
+    # Generate password reset link
+    email = "645364525@qq.com"
+    # email = "zhangyangFBI@126.com" # 非注册email无法生成
+    link = auth.generate_password_reset_link(email)
 
-    retrive_user_info("")
+    # Now send 'link' via your email service
+    print("Send this link to user:", link)
+    action_code_settings = ActionCodeSettings(
+        url="http://127.0.0.1:3001/firebase/auth?act=123",
+        handle_code_in_app=True
+    )
+    link2 = auth.generate_sign_in_with_email_link(email, action_code_settings)
+    print("Send this link to user:", link2)
+
+
+def run():
+    # cred = credentials.Certificate("E:\\FTP_Server\\JOS@\\Projects\\pythonProjects\\python_demo\\secrets\\fir-fe63d-firebase-adminsdk-fbsvc-9f369cab31.json")
+    # default_app = firebase_admin.initialize_app(cred)
+
+
+    # retrive_user_info("")
+    email_generate()
 
 if __name__ == "__main__":
     start = datetime.datetime.now()

@@ -7,12 +7,21 @@
 import datetime
 import resend
 from dotenv import load_dotenv
-import os
+import os, json
+from os.path import expanduser, expandvars
 
 load_dotenv()
 
+def get_secrets():
+    with open(expanduser('~/chat-robot.env')) as f:
+        secrets = json.load(f)
+    return secrets["resend"]
+
+resend_secrets = get_secrets()
+
 def run():
-    resend.api_key = os.getenv("RESEND_API_KEY")
+
+    resend.api_key = resend_secrets["API_KEY"]
     params: resend.Emails.SendParams = {
         "from": "you@email.kiramario.cn",
         "to": "645364525@qq.com",

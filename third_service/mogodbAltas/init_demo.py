@@ -6,12 +6,23 @@
 # @Author: mammon, kiramario
 import datetime
 import pymongo
-import sys
+import sys, json
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+from os.path import expanduser, expandvars
+
+def get_secrets():
+    with open(expanduser('~/chat-robot.env')) as f:
+        secrets = json.load(f)
+    return secrets["altas"]
+
+altas_secrets = get_secrets()
+
+# mongodb+srv://kiramario:<db_password>@cluster0.gwmkvqe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 
 def ping_mongodbalta():
-    uri = "mongodb+srv://kiramario:JVDohfFRpTuDzPlF@cluster0.gwmkvqe.mongodb.net/?appName=Cluster0"
+    uri = f"mongodb+srv://{altas_secrets['name']}:{altas_secrets['key']}@cluster0.gwmkvqe.mongodb.net/?appName=Cluster0"
+    # uri = "mongodb+srv://kiramario:<db_password>@cluster0.gwmkvqe.mongodb.net/?appName=Cluster0"
     client = MongoClient(uri)
 
     # Send a ping to confirm a successful connection

@@ -18,8 +18,6 @@ def get_secrets():
 
 altas_secrets = get_secrets()
 
-# mongodb+srv://kiramario:<db_password>@cluster0.gwmkvqe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-
 def ping_mongodbalta():
     uri = f"mongodb+srv://{altas_secrets['name']}:{altas_secrets['key']}@cluster0.gwmkvqe.mongodb.net/?appName=Cluster0"
     # uri = "mongodb+srv://kiramario:<db_password>@cluster0.gwmkvqe.mongodb.net/?appName=Cluster0"

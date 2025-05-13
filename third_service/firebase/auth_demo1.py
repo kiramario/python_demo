@@ -7,14 +7,17 @@
 import datetime
 import firebase_admin
 from firebase_admin import auth, credentials
-from firebase_admin.auth import ActionCodeSettings
+from firebase_admin.auth import ActionCodeSettings, UserRecord
 
+# Initialize app
+cred = credentials.Certificate("E:\\FTP_Server\\JOS@\\Projects\\pythonProjects\\python_demo\\secrets\\fir-fe63d-firebase-adminsdk-fbsvc-9f369cab31.json")
+default_app = firebase_admin.initialize_app(cred)
 
 def retrive_user_info():
     uid = "gzGd3TR6LlTFZzWxtJZe7rkvsDk2"
     user = auth.get_user(uid)
-    user = auth.get_user_by_email(email)
-    user = auth.get_user_by_phone_number(phone)
+    # user = auth.get_user_by_email(email)
+    # user = auth.get_user_by_phone_number(phone)
 
     print('Successfully fetched user data: {0}'.format(user.uid))
 
@@ -83,9 +86,6 @@ def retrive_user_info():
 
 
 def email_generate():
-    # Initialize app
-    cred = credentials.Certificate("E:\\FTP_Server\\JOS@\\Projects\\pythonProjects\\python_demo\\secrets\\fir-fe63d-firebase-adminsdk-fbsvc-9f369cab31.json")
-    default_app = firebase_admin.initialize_app(cred)
 
     # Generate password reset link
     email = "645364525@qq.com"
@@ -101,6 +101,10 @@ def email_generate():
     link2 = auth.generate_sign_in_with_email_link(email, action_code_settings)
     print("Send this link to user:", link2)
 
+def get_user():
+    uid = "gzGd3TR6LlTFZzWxtJZe7rkvsDk2"
+    user: UserRecord = auth.get_user(uid)
+    print(user)
 
 def run():
     # cred = credentials.Certificate("E:\\FTP_Server\\JOS@\\Projects\\pythonProjects\\python_demo\\secrets\\fir-fe63d-firebase-adminsdk-fbsvc-9f369cab31.json")
@@ -108,7 +112,9 @@ def run():
 
 
     # retrive_user_info("")
-    email_generate()
+    # email_generate()
+
+    get_user()
 
 if __name__ == "__main__":
     start = datetime.datetime.now()

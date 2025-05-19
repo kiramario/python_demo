@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import List
 from io import StringIO, TextIOBase
 import io
-from pyparsing import Word, alphas, OneOrMore, nums, Optional, ZeroOrMore, Literal
+from pyparsing import Word, alphas, OneOrMore, nums, Optional, ZeroOrMore, Literal, alphanums, Combine
 
 class CustomWriter(TextIOBase):
     def __init__(self):
@@ -19,17 +19,34 @@ class CustomWriter(TextIOBase):
     def write(self, text):
         self.content += text
 
-def run():
-    package = 'moviepy'
+def write_requirement(installed: str):
+    if not installed:
+        print("nothing write")
+        return
+    requirement_path = Path.cwd() / "requirementss.txt"
+
+    if not requirement_path.exists():
+        with open(str(requirement_path), 'w') as f:
+            pass
+
+    with open(str(requirement_path), "a+") as f:
+        f.writelines(installed)
+
+def run(package_name: str):
     cmd1 = [sys.executable, "-c", "import sys; print(sys.version)"]
-    cmd_install = [sys.executable, "-m", "pip", "install", package]
+    cmd_install = [sys.executable, "-m", "pip", "install", package_name]
     p = subprocess.Popen(cmd_install,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
 
     stdout, stderr = p.communicate()
 
-    parse_install_info(stdout)
+    if isinstance(stdout, bytes):
+        stdout = stdout.decode('utf-8')
+
+    installed = parse_install_info(stdout, package_name)
+
+    write_requirement(installed)
 
 # 此方法后面新版本是不准用了
 def install(package):
@@ -67,38 +84,16 @@ def install2(package):
     parse_install_info(custom_writer.content)
 
 # TODO: extract parser, lexer, make my past experience valuable
-def parse_install_info(stdout_str: str):
-    success_installes = stdout_str.split("Successfully installed")[1]
+def parse_install_info(stdout_str: str, package_name: str):
 
-    # 语法
-    """
-    package_version ::= alphas+ '-' nums+ '.' nums+ '.' nums+
-    """
-    aToz = Word(alphas)
-    words = OneOrMore(aToz)
+    if "Requirement already satisfied" in stdout_str:
+        return ""
 
-    package_name_a = words + Optional(Literal("-")) + Optional(words)
-    package_name_b = words + Optional(Literal("_")) + Optional(words)
-    package_name = Optional(package_name_a) + Optional(package_name_b)
-
-    version = OneOrMore(Word(nums+"."))
-
-    package_with_version = OneOrMore(package_name + "-" + version)
-
-    print(success_installes)
-    stats = package_with_version.parseString(success_installes)
-    print(list(stats))
-
-    # pattern = re.compile(r'[a-z]+\-(\d|\.)+', re.I)  # re.I 表示忽略大小写
-    # package_raw_info = success_installes.split("\n")
-    # print(package_raw_info)
-    #
-    # package_info = filter(
-    #     lambda x: len(x) > 0 and pattern.match(x),
-    #     map(lambda x: x.strip(), package_raw_info)
-    # )
-    # print(list(package_info))
-    # refresh_requirement(list(package_info))
+    dash = Literal("-")
+    version = Combine(Word(nums) + ("." + Word(nums)) * 2)
+    package_expr = Combine(Literal(package_name) + dash + version)
+    res = package_expr.searchString(stdout_str)
+    return res[0][0]
 
 def refresh_requirement(packages: List[str]):
     pip_install_py_path = Path(sys.argv[0])
@@ -154,14 +149,22 @@ Successfully installed
 
 """
 
+str_str_2 = """
+b'Requirement already satisfied: jinja2 in c:\\alluserapplication\\anaconda3\\envs\\demo\\lib\\site-packages (3.1.6)\r\nRequirement already satisfied: MarkupSafe>=2.0 in c:\\alluserapplication\\anaconda3\\envs\\demo\\lib\\site-packages (from jinja2) (3.0.2)\r\n'
+"""
+
 
 if __name__ == "__main__":
+    package_name = "jinja2" if len(sys.argv) == 1 else sys.argv[1]
 
     start = datetime.datetime.now()
-    # run()
+    run(package_name)
     # install("aiohttp")
     # install2("aiohttp")
-    parse_install_info(stdout_str)
+    # parse_install_info(stdout_str)
+
+
+
 
     # print(sys.executable)
     exec_time = (datetime.datetime.now() - start).total_seconds()

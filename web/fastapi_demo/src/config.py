@@ -4,20 +4,17 @@
 # @Calendar: 2025-04-21 11:26
 # @Time: 11:26
 # @Author: mammon, kiramario
-import datetime
-
-"""
-global configs
-"""
-import os
+import datetime, os
 from pathlib import Path
 from dotenv import load_dotenv
 from pydantic import PostgresDsn, RedisDsn, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from web.fastapi.src.constants import Environment
+from web.fastapi_demo.src.constants import Environment
 
+
+# xxx/python_demo
 current_path = Path.cwd()
-fastapi_root_path = current_path.parent
+fastapi_root_path = current_path / "web" /"fastapi_demo"
 
 class Config(BaseSettings):
     DATABASE_URL: PostgresDsn
@@ -47,9 +44,6 @@ settings = Config()
 
 
 def run():
-    current_path = Path.cwd()
-    fastapi_root_path = current_path.parent
-
     load_dotenv(dotenv_path=fastapi_root_path / ".env", verbose=True)
     print(os.getenv("environment", default=None))
 

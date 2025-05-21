@@ -1,11 +1,16 @@
+import asyncio
 from enum import Enum
 from fastapi import FastAPI
 from fastapi import Depends, Query, Path, Body
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from typing import Annotated
 from pydantic import BaseModel
+from io import BytesIO
+
 from web.fastapi_demo.src.schemas import User
 from web.fastapi_demo.src.auth.router import auth_router
+
 app = FastAPI()
 
 app.add_middleware(
@@ -40,6 +45,22 @@ async def create_user(user: Annotated[User, Body(..., title="The user to create"
     return {"user": user}
 
 
+@app.get("/stream")
+async def stream_video():
+    async def video_stream():
+        for i in range(10):
+            await asyncio.sleep(3)
+            print(f"i = {i}")
+            yield f"data: Streamed line {i}\n\n"
+        yield "event: close\ndata: bye\n\n"  # 👈 Custom event to signal end
 
+    return StreamingResponse(
+        video_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 app.include_router(auth_router)

@@ -1,1 +1,9 @@
-aiohappyeyeballs==2.6.1 aiohttp
+pyparsing==3.2.3
+pandas==2.2.3
+requests==2.32.3
+aiohttp==3.11.18
+py_mini_racer==0.6.0
+bs4==0.0.2
+tqdm==4.67.1
+jsonpath==0.82.2
+lxml==5.4.0

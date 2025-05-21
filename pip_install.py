@@ -1,17 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# python_demo.pip_install.py
-# @Calendar: 2025-04-08 22:49
-# @Time: 22:49
-# @Author: mammon, kiramario
 import datetime
 import subprocess
-import pip, sys, shlex, re
+import pip, sys
 from pathlib import Path
 from typing import List
 from io import StringIO, TextIOBase
-import io
-from pyparsing import Word, alphas, OneOrMore, nums, Optional, ZeroOrMore, Literal, alphanums, Combine
+from pyparsing import Word, nums,  Literal, Combine
 
 class CustomWriter(TextIOBase):
     def __init__(self):
@@ -20,17 +13,15 @@ class CustomWriter(TextIOBase):
         self.content += text
 
 def write_requirement(installed: str):
-    if not installed:
-        print("nothing write")
-        return
-    requirement_path = Path.cwd() / "requirementss.txt"
+    requirement_path = Path.cwd() / "requirements.txt"
 
     if not requirement_path.exists():
         with open(str(requirement_path), 'w') as f:
             pass
 
     with open(str(requirement_path), "a+") as f:
-        f.writelines(installed)
+        f.write("\n")
+        f.write(installed)
 
 def run(package_name: str):
     cmd1 = [sys.executable, "-c", "import sys; print(sys.version)"]
@@ -46,7 +37,13 @@ def run(package_name: str):
 
     installed = parse_install_info(stdout, package_name)
 
-    write_requirement(installed)
+    if not installed:
+        print("nothing write")
+        return
+
+    package_name_end_index = installed.index(package_name) + len(package_name)
+    to_write = installed[0 : package_name_end_index] + "==" + installed[ package_name_end_index + 1:]
+    write_requirement(to_write)
 
 # 此方法后面新版本是不准用了
 def install(package):
@@ -85,14 +82,12 @@ def install2(package):
 
 # TODO: extract parser, lexer, make my past experience valuable
 def parse_install_info(stdout_str: str, package_name: str):
-
-    if "Requirement already satisfied" in stdout_str:
-        return ""
-
     dash = Literal("-")
     version = Combine(Word(nums) + ("." + Word(nums)) * 2)
     package_expr = Combine(Literal(package_name) + dash + version)
     res = package_expr.searchString(stdout_str)
+    if len(res) == 0:
+        return ""
     return res[0][0]
 
 def refresh_requirement(packages: List[str]):
@@ -149,23 +144,19 @@ Successfully installed
 
 """
 
-str_str_2 = """
+stdout_str_2 = """
 b'Requirement already satisfied: jinja2 in c:\\alluserapplication\\anaconda3\\envs\\demo\\lib\\site-packages (3.1.6)\r\nRequirement already satisfied: MarkupSafe>=2.0 in c:\\alluserapplication\\anaconda3\\envs\\demo\\lib\\site-packages (from jinja2) (3.0.2)\r\n'
 """
 
 
 if __name__ == "__main__":
-    package_name = "jinja2" if len(sys.argv) == 1 else sys.argv[1]
+    package_name = "lxml" if len(sys.argv) == 1 else sys.argv[1]
 
     start = datetime.datetime.now()
     run(package_name)
     # install("aiohttp")
     # install2("aiohttp")
-    # parse_install_info(stdout_str)
-
-
-
-
+    # parse_install_info(stdout_str_2, package_name)
     # print(sys.executable)
     exec_time = (datetime.datetime.now() - start).total_seconds()
     print(f"run total spend: {exec_time:.3f}s\n")
